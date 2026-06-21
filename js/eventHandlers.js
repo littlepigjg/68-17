@@ -112,6 +112,49 @@ class EventHandlers {
         });
     }
 
+    bindAnimationControls() {
+        document.getElementById('playAnimationBtn').addEventListener('click', () => {
+            if (this.app.strokeAnimation.isPaused) {
+                this.app.resumeAnimation();
+            } else {
+                this.app.playAnimation();
+            }
+        });
+
+        document.getElementById('pauseAnimationBtn').addEventListener('click', () => {
+            this.app.pauseAnimation();
+        });
+
+        document.getElementById('stopAnimationBtn').addEventListener('click', () => {
+            this.app.stopAnimation();
+            this.app.isAnimationMode = false;
+            this.app.generatePreview();
+        });
+
+        document.getElementById('animationSpeed').addEventListener('input', (e) => {
+            const speed = parseFloat(e.target.value);
+            this.app.setAnimationSpeed(speed);
+        });
+
+        document.getElementById('strokeWidth').addEventListener('input', (e) => {
+            const width = parseFloat(e.target.value);
+            this.app.setStrokeWidth(width);
+        });
+
+        document.getElementById('animationProgress').addEventListener('input', (e) => {
+            const progress = parseFloat(e.target.value);
+            this.app.setAnimationProgress(progress);
+        });
+
+        document.getElementById('animPrevPage').addEventListener('click', () => {
+            this.app.changeAnimationPage(-1);
+        });
+
+        document.getElementById('animNextPage').addEventListener('click', () => {
+            this.app.changeAnimationPage(1);
+        });
+    }
+
     bindFontUpload() {
         document.getElementById('fontFile').addEventListener('change', (e) => {
             this.handleFontUpload(e.target.files[0]);
@@ -268,6 +311,7 @@ class EventHandlers {
         this.bindTextInput();
         this.bindActionButtons();
         this.bindPageNavigation();
+        this.bindAnimationControls();
         this.bindFontUpload();
         this.bindKeyboardShortcuts();
     }

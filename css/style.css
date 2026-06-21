@@ -355,3 +355,74 @@ input[type="range"]::-webkit-slider-thumb {
         max-height: none;
     }
 }
+
+.animation-controls {
+    margin-top: 8px;
+}
+
+.animation-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.btn-animation {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-animation.play {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+.btn-animation.play:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+}
+
+.btn-animation.pause {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.btn-animation.pause:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+.btn-animation.stop {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-animation.stop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.animation-page-nav {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #eee;
+}
+
+.animation-page-nav .page-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.animation-page-nav span {
+    display: block;
+}

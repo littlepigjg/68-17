@@ -2,6 +2,7 @@ class HandwritingApp {
     constructor() {
         this.canvas = document.getElementById('previewCanvas');
         this.renderer = new HandwritingRenderer(this.canvas);
+        this.strokeAnimation = new StrokeAnimation(this.canvas);
         this.exportManager = new ExportManager();
         this.exportHandlers = new ExportHandlers(this);
         this.eventHandlers = new EventHandlers(this);
@@ -10,6 +11,8 @@ class HandwritingApp {
         this.currentStyle = 'kaishu';
         this.customFontFamily = null;
         this.debounceTimer = null;
+        this.isAnimationMode = false;
+        this.animationPage = 0;
         
         this.init();
     }
@@ -41,6 +44,11 @@ class HandwritingApp {
     }
 
     generatePreview() {
+        if (this.isAnimationMode) {
+            this.stopAnimation();
+            this.isAnimationMode = false;
+        }
+        
         const text = document.getElementById('textInput').value;
         this.renderer.setOptions({ text });
         
@@ -79,6 +87,103 @@ class HandwritingApp {
         
         document.getElementById('prevPage').disabled = this.renderer.currentPage === 0;
         document.getElementById('nextPage').disabled = this.renderer.currentPage >= total - 1;
+    }
+
+    updateAnimationPageInfo() {
+        const current = this.strokeAnimation.currentPage + 1;
+        const total = this.strokeAnimation.getPageCount();
+        document.getElementById('animationPageInfo').textContent = `第 ${current} 页 / 共 ${total} 页`;
+        
+        document.getElementById('animPrevPage').disabled = this.strokeAnimation.currentPage === 0;
+        document.getElementById('animNextPage').disabled = this.strokeAnimation.currentPage >= total - 1;
+    }
+
+    async playAnimation() {
+        const text = document.getElementById('textInput').value;
+        
+        const animationOptions = { ...this.renderer.options };
+        this.strokeAnimation.setOptions(animationOptions);
+        
+        this.strokeAnimation.onProgress = (progress) => {
+            document.getElementById('animationProgress').value = progress * 100;
+            document.getElementById('animationProgressValue').textContent = Math.round(progress * 100) + '%';
+        };
+        
+        this.strokeAnimation.onComplete = () => {
+            document.getElementById('playAnimationBtn').style.display = 'block';
+            document.getElementById('pauseAnimationBtn').style.display = 'none';
+        };
+        
+        this.isAnimationMode = true;
+        this.showLoading();
+        
+        try {
+            await this.strokeAnimation.playPage(this.animationPage);
+            this.updateAnimationPageInfo();
+            document.getElementById('playAnimationBtn').style.display = 'none';
+            document.getElementById('pauseAnimationBtn').style.display = 'block';
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    pauseAnimation() {
+        this.strokeAnimation.pause();
+        document.getElementById('playAnimationBtn').style.display = 'block';
+        document.getElementById('pauseAnimationBtn').style.display = 'none';
+    }
+
+    resumeAnimation() {
+        this.strokeAnimation.play();
+        document.getElementById('playAnimationBtn').style.display = 'none';
+        document.getElementById('pauseAnimationBtn').style.display = 'block';
+    }
+
+    stopAnimation() {
+        this.strokeAnimation.stop();
+        this.strokeAnimation.dispose();
+        document.getElementById('playAnimationBtn').style.display = 'block';
+        document.getElementById('pauseAnimationBtn').style.display = 'none';
+        document.getElementById('animationProgress').value = 0;
+        document.getElementById('animationProgressValue').textContent = '0%';
+    }
+
+    setAnimationSpeed(speed) {
+        this.strokeAnimation.setSpeed(speed);
+        document.getElementById('animationSpeedValue').textContent = speed.toFixed(1) + 'x';
+    }
+
+    setStrokeWidth(width) {
+        this.strokeAnimation.setStrokeWidth(width);
+        document.getElementById('strokeWidthValue').textContent = width.toFixed(1);
+        
+        if (this.isAnimationMode) {
+            this.strokeAnimation.render();
+        }
+    }
+
+    setAnimationProgress(progress) {
+        if (this.strokeAnimation.pageStrokes.length > 0) {
+            this.strokeAnimation.setProgress(progress / 100);
+            document.getElementById('animationProgressValue').textContent = Math.round(progress) + '%';
+        }
+    }
+
+    changeAnimationPage(direction) {
+        const pageCount = this.strokeAnimation.getPageCount();
+        let newPage = this.animationPage + direction;
+        
+        if (newPage < 0) newPage = 0;
+        if (newPage >= pageCount) newPage = pageCount - 1;
+        
+        if (newPage !== this.animationPage) {
+            this.animationPage = newPage;
+            if (this.isAnimationMode) {
+                this.stopAnimation();
+                this.playAnimation();
+            }
+            this.updateAnimationPageInfo();
+        }
     }
 
     async exportCurrentPage() {
